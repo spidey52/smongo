@@ -2,7 +2,6 @@ package smongo
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -37,7 +36,7 @@ func (q *Query[T]) Find(ctx context.Context) ([]T, error) {
 		return nil, err
 	}
 
-	jsonBytes, err := json.Marshal(rawResult)
+	bsonBytes, err := bson.Marshal(rawResult)
 
 	if err != nil {
 		fmt.Println("error in marshalling", err.Error())
@@ -46,7 +45,7 @@ func (q *Query[T]) Find(ctx context.Context) ([]T, error) {
 
 	var results []T
 
-	if err := json.Unmarshal(jsonBytes, &results); err != nil {
+	if err := bson.Unmarshal(bsonBytes, &results); err != nil {
 		return nil, err
 	}
 
