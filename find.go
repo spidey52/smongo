@@ -30,25 +30,28 @@ func (q *Query[T]) FindRaw(ctx context.Context) ([]bson.M, error) {
 }
 
 func (q *Query[T]) Find(ctx context.Context) ([]T, error) {
-
 	rawResult, err := q.FindRaw(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	bsonBytes, err := bson.Marshal(rawResult)
-
-	if err != nil {
-		fmt.Println("error in marshalling", err.Error())
-		return nil, err
-	}
-
 	var results []T
 
-	if err := bson.Unmarshal(bsonBytes, &results); err != nil {
-		return nil, err
+	for _, raw := range rawResult {
+		// Marshal single document
+		bsonBytes, err := bson.Marshal(raw)
+		if err != nil {
+			return nil, err
+		}
+
+		// Unmarshal into generic type
+		var item T
+		if err := bson.Unmarshal(bsonBytes, &item); err != nil {
+			return nil, err
+		}
+
+		results = append(results, item)
 	}
 
 	return results, nil
-
 }
